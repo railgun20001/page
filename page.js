@@ -1,3 +1,5 @@
+var log = console.log.bind(console)
+
 // 配置 Mock 路径
 require.config({
     paths: {
@@ -12,21 +14,20 @@ require(['mock'], function(Mock){
             'id|+1': 1
         }]
     })
-    // 输出结果
-    document.body.innerHTML +=
-        '<pre>' +
-        JSON.stringify(data, null, 4) +
-        '</pre>'
+
+    function getList() {
+        var data = Mock.mock({
+            'list|1-10': [{
+                'id|+1': 1
+            }]
+        })
+        return data
+    }
 })
 
-Mock.mock({
-    'number1|1-100.1-10': 1,
-    'number2|123.1-10': 1,
-    'number3|123.3': 1,
-    'number4|123.10': 1.123
-})
+var data = getList()
+log(data)
 
-var log = console.log.bind(console)
 var page = function(option, getPageFunc) {
     var defaultOption = {
         page: 1,
