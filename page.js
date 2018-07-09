@@ -1,26 +1,29 @@
-var log = console.log.bind(console)
-
-function (params) {
-    
+function getListTest() {
+    var list = []
+    for (let i = 0; i < 10; i++) {
+        list.push({
+            id: i,
+        })
+    }
+    return list
 }
 
-function Page(option, getPageFunc) {
+var log = console.log.bind(console)
+
+function Page(getPageFunc, option) {
     var defaultOption = {
-        page: 1,
+        initPage: 1,
         limit: 10,
-        list: [],
-        filter: {},
-    }
-    var o = Object.assign(defaultOption, option)
-
-   
-
-
-    o.next = function() {
-
+        initList: [],
+        initFilter: {},
     }
 
-    return 0
+    this.option = Object.assign(defaultOption, option) 
+
+    this.page = this.option.initPage
+    this.list = this.option.initList
+    this.filter = this.option.initFilter
+    this.getPageFunc = getPageFunc
 }
 
 /**
@@ -28,25 +31,35 @@ function Page(option, getPageFunc) {
  */
 Page.prototype.init = function() {
     return new Promise((resolve, reject) => {
+        var that = this
         // getPageFunc异步完成后的回调函数
         var callback = function(list) {
-            var oldList = o.list
-            if(o.list.length === 0) {
-                o.list = list
-            } else {
-                o.list = o.list.concat(list)
-            }
-            resolve(o.list, oldList)
+            var oldList = that.list
+            that.list = that.list.concat(list)
+            resolve(that.list, oldList)
         }
 
         var res = {
-            page: o.page,
-            limit: o.limit,
-            filter: o.filter,
+            page: this.page,
+            limit: this.option.limit,
+            filter: this.filter,
         }
 
-        getPageFunc(res, callback)
+        this.getPageFunc(res, callback)
     })
 }
-var page = page()
 
+Page.prototype.next = function() {
+    return new Promise((resolve, reject) => {
+        this.page++
+
+    })
+}
+
+var page = new Page((res, callback) => {
+    var list = getListTest()
+    callback(list)
+})
+page.init().then((list, oldList) => {
+    console.log(list)
+})
